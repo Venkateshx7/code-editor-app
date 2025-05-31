@@ -1,55 +1,23 @@
-<<<<<<< HEAD
-from flask import Flask, request, jsonify
-import sys
-import io
+from flask import Flask, send_from_directory
 
-app = Flask(__name__)
+# Create Flask app, tell it where React build files live
+app = Flask(__name__, static_folder='client/build', static_url_path='')
 
-@app.route("/run", methods=["POST"])
-def run_code():
-    data = request.get_json()
-    code = data.get("code", "")
+# Route for React app root URL
+@app.route('/')
+def serve():
+    return send_from_directory(app.static_folder, 'index.html')
 
-    old_stdout = sys.stdout
-    redirected_output = sys.stdout = io.StringIO()
+# Route to serve React static files (JS, CSS, images, etc.)
+@app.route('/<path:path>')
+def static_files(path):
+    return send_from_directory(app.static_folder, path)
 
-    try:
-        exec(code)
-        output = redirected_output.getvalue()
-    except Exception as e:
-        output = str(e)
-    finally:
-        sys.stdout = old_stdout
+# Example API route (optional)
+@app.route('/api/hello')
+def hello():
+    return {'message': 'Hello from Flask!'}
 
-    return jsonify({"output": output})
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
-=======
-from flask import Flask, request, jsonify
-import sys
-import io
-
-app = Flask(__name__)
-
-@app.route("/run", methods=["POST"])
-def run_code():
-    data = request.get_json()
-    code = data.get("code", "")
-
-    old_stdout = sys.stdout
-    redirected_output = sys.stdout = io.StringIO()
-
-    try:
-        exec(code)
-        output = redirected_output.getvalue()
-    except Exception as e:
-        output = str(e)
-    finally:
-        sys.stdout = old_stdout
-
-    return jsonify({"output": output})
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
->>>>>>> 76afcd525f0ca080fb80f7e4913e9710407ce9e2
+if __name__ == '__main__':
+    # Listen on all network interfaces, port 5000 (or use env var)
+    app.run(host='0.0.0.0', port=5000)
